@@ -16,6 +16,7 @@
         <junit-jupiter.version>5.10.3</junit-jupiter.version>
     </properties>
     <dependencies>
+        <!-- MariaDB JDBC -->
         <dependency>
             <groupId>org.mariadb.jdbc</groupId>
             <artifactId>mariadb-java-client</artifactId>
