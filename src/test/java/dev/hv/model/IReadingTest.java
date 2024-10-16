@@ -1,6 +1,5 @@
 package dev.hv.model;
 
-import static org.junit.jupiter.api.Assertions.*;
 class IReadingTest {
 
     @org.junit.jupiter.api.Test
