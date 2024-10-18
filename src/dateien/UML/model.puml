@@ -1,0 +1,26 @@
+@startuml
+' configuration
+hide circle
+skinparam linetype ortho
+
+' comment
+entity "Customer" as Customer {
+    **uuid: UUID PK**
+    firstName: String
+    lastName: String
+    birthDate: Date
+    gender: Gender
+}
+
+entity "Reading" as Reading {
+    **uuid: UUID PK**
+    customerUuid: UUID FK
+    meterId: String
+    kindOfMeter: KindOfMeter
+    dateOfReading: Date
+    meterCount: Double
+}
+
+Customer "1" -- "*" Reading
+
+@enduml
