@@ -2,7 +2,7 @@ package dev.hv.model;
 
 import java.time.LocalDate;
 
-public interface ICustomer {
+public interface ICustomer extends IId {
 
     void setFirstName(String fistName);
     void setLastName(String lastName);

@@ -6,5 +6,5 @@ public interface IDao<T> {
     void create(T obj);
     T read(UUID id);
     void update(T obj);
-    void delete(int id);
+    void delete(UUID id);
 }
