@@ -27,7 +27,7 @@ public class CustomerDao implements IDao<Customer> {
         //String sql ="INSERT INTO Customer (UUID, firstName, lastName, birthDate, gender) VALUES (UUID, firstName, lastName, birthDate, gender);";
 
         try (PreparedStatement statement = connection.prepareStatement("""
-              INSERT INTO Customer (UUID, firstName, lastName, birthDate, gender)
+              INSERT INTO Customer (id, firstName, lastName, birthDate, gender)
               VALUES (?, ?, ?, ?, ? )
               """)) {
             statement.setObject(1, customer.getId());
@@ -57,7 +57,7 @@ public class CustomerDao implements IDao<Customer> {
         try (PreparedStatement statement = connection.prepareStatement("""
             SELECT *
             FROM Customer
-            WHERE UUID = ?
+            WHERE id = ?
             """)) {
 
             statement.setObject(1, id);
@@ -90,7 +90,7 @@ public class CustomerDao implements IDao<Customer> {
         try (PreparedStatement statement = connection.prepareStatement("""
               UPDATE Customer
               SET firstName = ?, lastName = ?, birthDate = ?, gender = ?
-              WHERE CustomerID = ?
+              WHERE id = ?
               """)) {
             statement.setString(1, customer.getFirstName());
             statement.setString(2, customer.getLastName());
@@ -100,9 +100,13 @@ public class CustomerDao implements IDao<Customer> {
 
             int rowsUpdated = statement.executeUpdate();
 
+            if (rowsUpdated > 1) {
+                // Handle the case where multiple rows were updated
+                throw new RuntimeException("Not only one row were effected. More than one row was updated." + customer.getId());
+            }
             if (rowsUpdated == 0) {
                 // Handle the case where no rows were updated
-                throw new RuntimeException("No customer found with the provided ID: " + customer.getId());
+                throw new RuntimeException("No Row wos were Updated" + customer.getId());
             }
         } catch (SQLException e) {
             throw new RuntimeException("CustomerDao update Failure: " + e);
@@ -115,7 +119,7 @@ public class CustomerDao implements IDao<Customer> {
 
         try (PreparedStatement statement = connection.prepareStatement("""
                 DELETE * FROM Customer
-                WHERE CustomerID = ?
+                WHERE id = ?
                 """)) {
             statement.setObject(1, id);
 
