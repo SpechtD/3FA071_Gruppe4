@@ -1,6 +1,5 @@
 package dev.hv.dao;
 import dev.hv.Customer;
-import dev.hv.dao.DbConnection;
 import dev.hv.model.Gender;
 
 import java.sql.Connection;
