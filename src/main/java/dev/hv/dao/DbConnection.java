@@ -70,7 +70,7 @@ public class DbConnection implements IDatabaseConnection {
 
     @Override
     public void createAllTables() {
-        String table = "CREATE TABLE IF NOT EXISTS Customer " +
+        String createalltables = "CREATE TABLE IF NOT EXISTS Customer " +
                 "(id UUID PRIMARY KEY NOT NULL, " +
                 "firstName VARCHAR(50) NOT NULL, " +
                 "lastName VARCHAR(50) NOT NULL, " +
@@ -87,7 +87,7 @@ public class DbConnection implements IDatabaseConnection {
                 "substitute BIT," +
                 "type VARCHAR(50))";
         try (Statement stmt = connection.createStatement()) {
-            stmt.executeUpdate(table);
+            stmt.executeUpdate(createalltables);
         } catch (SQLException e) {
             throw new RuntimeException("createAllTables wasn't successful: " + e);
         }
@@ -95,12 +95,30 @@ public class DbConnection implements IDatabaseConnection {
 
     @Override
     public void truncateAllTables() {
+        String truncatealltables = "SET FOREIGN_KEY_CHECKS=0 " +
+                "TRUNCATE TABLE Customer," +
+                "TRUNCATE TABLE Reading" +
+                "SET FOREIGN_KEY_CHECKS = 1";
 
+        try (Statement stmt = connection.createStatement()) {
+            stmt.executeUpdate(truncatealltables);
+        } catch (SQLException e) {
+            throw new RuntimeException("truncateAllTables wasn't successful: " + e);
+        }
     }
 
     @Override
     public void removeAllTables() {
+        String removealltables = "SET FOREIGN_KEY_CHECKS = 0" +
+                "DROP TABLE IF EXISTS Customer," +
+                "DROP TABLE IF EXISTS Reading," +
+                "SET FOREIGN_KEY_CHECKS = 1";
 
+        try (Statement stmt = connection.createStatement()) {
+            stmt.executeUpdate(removealltables);
+        } catch (SQLException e) {
+            throw new RuntimeException("removealltables wasn't successful: " + e);
+        }
     }
 
     public void closeConnection() {
