@@ -12,14 +12,7 @@ import java.util.UUID;
 
 public class CustomerDao implements IDao<Customer> {
 
-   private Connection connection;
-
-   public CustomerDao(){
-       //TODO Insert Connection class method
-
-       this.connection = connection;
-
-   }
+    private final Connection connection = DbConnection.getInstance().getConnection();
 
     @Override
     public void create(Customer customer) {
