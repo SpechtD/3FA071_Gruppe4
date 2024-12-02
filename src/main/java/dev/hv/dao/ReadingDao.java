@@ -4,6 +4,7 @@ import dev.hv.Reading;
 import dev.hv.model.ICustomer;
 import dev.hv.model.KindOfMeter;
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -12,7 +13,7 @@ import java.util.UUID;
 
 public class ReadingDao implements IDao<Reading> {
 
-    private final DbConnection connection = DbConnection.getInstance();
+    private final Connection connection = DbConnection.getInstance().getConnection();
 
 
     //use PreparedStatement to avoid SQLException
@@ -20,7 +21,7 @@ public class ReadingDao implements IDao<Reading> {
     public void create(Reading reading){
         String sql = "INSERT INTO Reading (id, comment, customer, dateOfReading, kindOfMeter, meterCount, meterId, substitute) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
-        try (PreparedStatement statement = connection.getConnection().prepareStatement(sql)){ //PreparedStatement checks sql command to avoid sql injections
+        try (PreparedStatement statement = connection.prepareStatement(sql)){ //PreparedStatement checks sql command to avoid sql injections
             statement.setObject(1, reading.getId());
             statement.setString(2, reading.getComment());
             statement.setObject(3, reading.getCustomer());
@@ -43,7 +44,7 @@ public class ReadingDao implements IDao<Reading> {
     public Reading read(UUID id){
         String sql = "SELECT * FROM Reading WHERE id = ?";
 
-        try (PreparedStatement statement = connection.getConnection().prepareStatement(sql)){
+        try (PreparedStatement statement = connection.prepareStatement(sql)){
             statement.setObject(1, id);
 
             try (ResultSet resultSet = statement.executeQuery()) {
@@ -72,7 +73,7 @@ public class ReadingDao implements IDao<Reading> {
     public void update(Reading reading){
         String sql = "UPDATE Reading SET comment = ?, customer = ?, dateOfReading = ?, kindOfMeter = ?, meterCount = ?, meterId = ?, substitute = ? WHERE id = ?";
 
-        try (PreparedStatement statement = connection.getConnection().prepareStatement(sql)){
+        try (PreparedStatement statement = connection.prepareStatement(sql)){
             statement.setString(1, reading.getComment());
             statement.setObject(2, reading.getCustomer());
             statement.setObject(3, reading.getDateOfReading());
@@ -97,7 +98,7 @@ public class ReadingDao implements IDao<Reading> {
     public void delete(UUID id){
         String sql = "DELETE FROM Reading WHERE id=?";
 
-        try (PreparedStatement statement = connection.getConnection().prepareStatement(sql)){
+        try (PreparedStatement statement = connection.prepareStatement(sql)){
             statement.setObject(1, id);
 
             int insertedRows = statement.executeUpdate();
