@@ -27,12 +27,12 @@ public class Customer implements ICustomer {
     }
 
 
-    @Override
+
     public UUID getId() {
         return customerDao.read(this.id).id;
     }
 
-    @Override
+
     public void setId(UUID id) {
         this.id = id;
         customerDao.update(this);
