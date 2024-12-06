@@ -15,8 +15,6 @@ public class Customer implements ICustomer {
     CustomerDao customerDao = new CustomerDao();
 
     // Constructor
-
-
     public Customer(UUID id, String firstName,String lastName, Gender gender, LocalDate BirthDate) {
         this.id = id;
         this.firstName = firstName;
@@ -27,57 +25,56 @@ public class Customer implements ICustomer {
     }
 
 
-    @Override
+    // Getter and Setter for id
     public UUID getId() {
-        return customerDao.read(this.id).id;
+        return id;
     }
 
-    @Override
     public void setId(UUID id) {
         this.id = id;
-        customerDao.update(this);
     }
 
+    // Getter and Setter for firstName
     @Override
     public String getFirstName() {
-        return customerDao.read(this.id).firstName;
+        return firstName;
     }
 
     @Override
     public void setFirstName(String firstName) {
         this.firstName = firstName;
-        customerDao.update(this);
     }
 
+    // Getter and Setter for lastName
     @Override
     public String getLastName() {
-        return customerDao.read(this.id).lastName;
+        return lastName;
     }
 
     @Override
     public void setLastName(String lastName) {
         this.lastName = lastName;
-        customerDao.update(this);
     }
 
-    public LocalDate getBirthDate() {
-
-        return customerDao.read(this.id).BirthDate;
-    }
-
-    public void setBirthDate(LocalDate BirthDate) {
-        this.BirthDate = BirthDate;
-        customerDao.update(this);
-    }
-
+    // Getter and Setter for gender
     @Override
     public Gender getGender() {
-        return customerDao.read(this.id).gender;
+        return gender;
     }
 
     @Override
     public void setGender(Gender gender) {
         this.gender = gender;
-        customerDao.update(this);
+    }
+
+    // Getter and Setter for BirthDate
+    @Override
+    public LocalDate getBirthDate() {
+        return BirthDate;
+    }
+
+    @Override
+    public void setBirthDate(LocalDate BirthDate) {
+        this.BirthDate = BirthDate;
     }
 }
