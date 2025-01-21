@@ -1,6 +1,7 @@
 package dev.hv;
 
 import dev.hv.model.ICustomer;
+import dev.hv.model.IId;
 import dev.hv.model.IReading;
 import dev.hv.model.KindOfMeter;
 
@@ -8,7 +9,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
-public class Reading implements IReading {
+public class Reading implements IReading, IId {
     private UUID id;
     private String comment;
     private ICustomer customer;
