@@ -2,7 +2,7 @@ package dev.hv.model;
 
 import java.time.LocalDate;
 
-public interface IReading {
+public interface IReading extends IId{
 
     void setComment(String comment);
     void setCustomer(ICustomer customer);

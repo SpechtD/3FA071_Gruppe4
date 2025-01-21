@@ -18,8 +18,8 @@ CREATE TABLE IF NOT EXISTS Reading (
     dateOfReading DATE DEFAULT CURRENT_DATE,
     kindOfMeter VARCHAR(50),
     meterCount DOUBLE,
+    meterId VARCHAR(50), //TODO check type
     substitute BIT,
-    type VARCHAR(50)
 );
 
 
