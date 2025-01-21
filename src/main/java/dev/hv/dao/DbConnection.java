@@ -107,10 +107,8 @@ public class DbConnection implements IDatabaseConnection {
 
     @Override
     public void removeAllTables() {
-        String removealltables = "SET FOREIGN_KEY_CHECKS = 0" +
-                "DROP TABLE IF EXISTS Customer," +
-                "DROP TABLE IF EXISTS Reading," +
-                "SET FOREIGN_KEY_CHECKS = 1";
+        String removealltables = 
+                "DROP TABLE IF EXISTS Reading, Customer";
 
         try (Statement stmt = connection.createStatement()) {
             stmt.executeUpdate(removealltables);
