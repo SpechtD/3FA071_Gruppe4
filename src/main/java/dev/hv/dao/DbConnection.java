@@ -68,13 +68,14 @@ public class DbConnection implements IDatabaseConnection {
 
     @Override
     public void createAllTables() {
-        String createCustomer = "CREATE TABLE IF NOT EXISTS Customer " +
+        String createalltables = "CREATE TABLE IF NOT EXISTS Customer " +
                 "(id UUID PRIMARY KEY NOT NULL, " +
                 "firstName VARCHAR(50) NOT NULL, " +
                 "lastName VARCHAR(50) NOT NULL, " +
-                "birthDate DATE, " +
-                "gender VARCHAR(1))";
-        String createReading = "CREATE TABLE IF NOT EXISTS Reading " +
+                "birthDate, " +
+                "gender CHAR(1))" +
+
+                "CREATE TABLE IF NOT EXISTS Reading " +
                 "(id UUID PRIMARY KEY NOT NULL, " +
                 "comment VARCHAR(255) NOT NULL, " +
                 "customer UUID NOT NULL, " +
@@ -84,8 +85,7 @@ public class DbConnection implements IDatabaseConnection {
                 "substitute BIT," +
                 "type VARCHAR(50))";
         try (Statement stmt = connection.createStatement()) {
-            stmt.executeUpdate(createCustomer);
-            stmt.executeUpdate(createReading);
+            stmt.executeUpdate(createalltables);
         } catch (SQLException e) {
             throw new RuntimeException("createAllTables wasn't successful: " + e);
         }
@@ -93,8 +93,10 @@ public class DbConnection implements IDatabaseConnection {
 
     @Override
     public void truncateAllTables() {
-        String truncatealltables =
-                "TRUNCATE TABLE Reading, Customer";
+        String truncatealltables = "SET FOREIGN_KEY_CHECKS=0 " +
+                "TRUNCATE TABLE Customer," +
+                "TRUNCATE TABLE Reading" +
+                "SET FOREIGN_KEY_CHECKS = 1";
 
         try (Statement stmt = connection.createStatement()) {
             stmt.executeUpdate(truncatealltables);
@@ -105,7 +107,7 @@ public class DbConnection implements IDatabaseConnection {
 
     @Override
     public void removeAllTables() {
-        String removealltables =
+        String removealltables = 
                 "DROP TABLE IF EXISTS Reading, Customer";
 
         try (Statement stmt = connection.createStatement()) {
