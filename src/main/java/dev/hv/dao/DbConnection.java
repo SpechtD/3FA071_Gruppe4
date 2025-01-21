@@ -17,8 +17,6 @@ public class DbConnection implements IDatabaseConnection {
     private static final String DB_Properties = "/db.properties";
 
     private DbConnection() {
-        getLoginProperties();
-
     }
 
     public static DbConnection getInstance() {
