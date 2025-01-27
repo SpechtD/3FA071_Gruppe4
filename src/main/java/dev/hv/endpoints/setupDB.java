@@ -10,6 +10,7 @@ public class setupDB {
     @DELETE
     public Response responseSetupDB() {
         DbConnection.getInstance().removeAllTables();
+        DbConnection.getInstance().createAllTables();
         return Response.status(Response.Status.OK).build();
     }
 }
