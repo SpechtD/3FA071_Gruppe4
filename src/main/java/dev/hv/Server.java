@@ -13,6 +13,7 @@ public class Server {
         final String pack = "dev.hv.resource";
         System.out.println("Start server");
         System.out.println(url);
+        final String pack = "dev.hv.endpoints";
         final ResourceConfig rc = new ResourceConfig().packages(pack);
         server = JdkHttpServerFactory.createHttpServer(URI.create(url), rc);
     }
