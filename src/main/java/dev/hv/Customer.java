@@ -6,7 +6,7 @@ import dev.hv.model.Gender;
 import dev.hv.model.ICustomer;
 
 public class Customer implements ICustomer {
-    private UUID id;
+    private final UUID id;
     private String firstName;
     private String lastName;
     private Gender gender;
@@ -25,10 +25,6 @@ public class Customer implements ICustomer {
     // Getter and Setter for id
     public UUID getId() {
         return id;
-    }
-
-    public void setId(UUID id) {
-        this.id = id;
     }
 
     // Getter and Setter for firstName
