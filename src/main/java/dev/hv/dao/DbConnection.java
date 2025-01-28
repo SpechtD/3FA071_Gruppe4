@@ -28,8 +28,6 @@ public class DbConnection implements IDatabaseConnection {
 
     public static Properties getLoginProperties() {
 
-        final String user_home = System.getProperty("user.home");
-
         final Properties prop = new Properties();
         try {
             prop.load(DbConnection.class.getResourceAsStream(DB_Properties));
