@@ -1,6 +1,10 @@
 package dev.hv.dao;
 
 import dev.hv.model.IDatabaseConnection;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.testcontainers.containers.MariaDBContainer;
+import org.testcontainers.utility.DockerImageName;
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -15,6 +19,9 @@ public class DbConnection implements IDatabaseConnection {
 
     private static DbConnection INSTANCE;
     private static final String DB_Properties = "/db.properties";
+    static MariaDBContainer<?> mariaDb;
+
+    private static final Logger logger = LogManager.getLogger(DbConnection.class);
 
     private DbConnection() {
     }
@@ -34,6 +41,7 @@ public class DbConnection implements IDatabaseConnection {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+
         return prop;
     }
 
@@ -52,11 +60,19 @@ public class DbConnection implements IDatabaseConnection {
         String dbPassword = properties.getProperty(username + ".db.psw", "");
 
         if (dbUrl == null || dbUser == null) {
-            throw new RuntimeException("Database credentials not found for user: " + username);
+            logger.debug("db.url or db.user not set! Using Testcontainers.");
+            mariaDb = new MariaDBContainer<>(
+                    DockerImageName.parse("library/mariadb:11.4.4").asCompatibleSubstituteFor("mariadb")
+            );
+            mariaDb.start();
+            dbUrl = mariaDb.getJdbcUrl();
+            dbUser = mariaDb.getUsername();
+            dbPassword = mariaDb.getPassword();
         }
 
         try {
             connection = DriverManager.getConnection(dbUrl, dbUser, dbPassword);
+            logger.debug("Successfully connected to database at: {} as {}", dbUrl, dbPassword);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
