@@ -73,13 +73,13 @@ public class DbConnection implements IDatabaseConnection {
                 "birthDate DATE, " +
                 "gender VARCHAR(1))";
         String createReading = "CREATE TABLE IF NOT EXISTS Reading " +
-                "(id UUID PRIMARY KEY," +
-                "comment VARCHAR(255)," +
-                "customer UUID," +
+                "(id UUID PRIMARY KEY NOT NULL," +
+                "comment VARCHAR(255) NOT NULL," +
+                "customer UUID NOT NULL," +
                 "dateOfReading DATE DEFAULT CURRENT_DATE," +
                 "kindOfMeter VARCHAR(50)," +
                 "meterCount DOUBLE," +
-                "meterId VARCHAR(50), //TODO check type," +
+                "meterId VARCHAR(50) NOT NULL," +
                 "substitute BIT)";
 
         try (Statement stmt = connection.createStatement()) {
