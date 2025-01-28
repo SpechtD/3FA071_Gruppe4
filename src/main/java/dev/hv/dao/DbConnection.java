@@ -28,11 +28,9 @@ public class DbConnection implements IDatabaseConnection {
 
     public static Properties getLoginProperties() {
 
-        final String user_home = System.getProperty("user.home");
-
         final Properties prop = new Properties();
         try {
-            prop.load(Main.class.getResourceAsStream(DB_Properties));
+            prop.load(DbConnection.class.getResourceAsStream(DB_Properties));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -75,14 +73,15 @@ public class DbConnection implements IDatabaseConnection {
                 "birthDate DATE, " +
                 "gender VARCHAR(1))";
         String createReading = "CREATE TABLE IF NOT EXISTS Reading " +
-                "(id UUID PRIMARY KEY NOT NULL, " +
-                "comment VARCHAR(255) NOT NULL, " +
-                "customer UUID NOT NULL, " +
-                "dateOfReading DATE DEFAULT CURRENT_DATE, " +
-                "kindOfMeter VARCHAR(50) NOT NULL," +
+                "(id UUID PRIMARY KEY," +
+                "comment VARCHAR(255)," +
+                "customer UUID," +
+                "dateOfReading DATE DEFAULT CURRENT_DATE," +
+                "kindOfMeter VARCHAR(50)," +
                 "meterCount DOUBLE," +
-                "substitute BIT," +
-                "type VARCHAR(50))";
+                "meterId VARCHAR(50), //TODO check type," +
+                "substitute BIT)";
+
         try (Statement stmt = connection.createStatement()) {
             stmt.executeUpdate(createCustomer);
             stmt.executeUpdate(createReading);
@@ -93,11 +92,11 @@ public class DbConnection implements IDatabaseConnection {
 
     @Override
     public void truncateAllTables() {
-        String truncatealltables =
+        String truncateAllTables =
                 "TRUNCATE TABLE Reading, Customer";
 
         try (Statement stmt = connection.createStatement()) {
-            stmt.executeUpdate(truncatealltables);
+            stmt.executeUpdate(truncateAllTables);
         } catch (SQLException e) {
             throw new RuntimeException("truncateAllTables wasn't successful: " + e);
         }
@@ -105,13 +104,13 @@ public class DbConnection implements IDatabaseConnection {
 
     @Override
     public void removeAllTables() {
-        String removealltables =
+        String removeAllTables =
                 "DROP TABLE IF EXISTS Reading, Customer";
 
         try (Statement stmt = connection.createStatement()) {
-            stmt.executeUpdate(removealltables);
+            stmt.executeUpdate(removeAllTables);
         } catch (SQLException e) {
-            throw new RuntimeException("removealltables wasn't successful: " + e);
+            throw new RuntimeException("removeAllTables wasn't successful: " + e);
         }
     }
 
