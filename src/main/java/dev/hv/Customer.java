@@ -2,17 +2,15 @@ package dev.hv;
 import java.time.LocalDate;
 import java.util.UUID;
 
-import dev.hv.dao.CustomerDao;
 import dev.hv.model.Gender;
 import dev.hv.model.ICustomer;
 
 public class Customer implements ICustomer {
-    private UUID id;
+    private final UUID id;
     private String firstName;
     private String lastName;
     private Gender gender;
     private LocalDate BirthDate;
-    CustomerDao customerDao = new CustomerDao();
 
     // Constructor
     public Customer(UUID id, String firstName,String lastName, Gender gender, LocalDate BirthDate) {
@@ -21,17 +19,12 @@ public class Customer implements ICustomer {
         this.lastName = lastName;
         this.gender = gender;
         this.BirthDate = BirthDate;
-        customerDao.create(this);
     }
 
 
     // Getter and Setter for id
     public UUID getId() {
         return id;
-    }
-
-    public void setId(UUID id) {
-        this.id = id;
     }
 
     // Getter and Setter for firstName
