@@ -1,7 +1,8 @@
 package dev.hv.dao;
 
+import dev.hv.Customer;
 import dev.hv.Reading;
-import dev.hv.model.ICustomer;
+import dev.hv.model.Gender;
 import dev.hv.model.KindOfMeter;
 
 import java.sql.Connection;
@@ -9,12 +10,13 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 public class ReadingDao implements IDao<Reading> {
 
     private final Connection connection = DbConnection.getInstance().getConnection();
-
 
     //use PreparedStatement to avoid SQLException
     @Override
@@ -42,23 +44,45 @@ public class ReadingDao implements IDao<Reading> {
 
     @Override
     public Reading read(UUID id){
-        String sql = "SELECT * FROM Reading WHERE id = ?";
+        String sql = "SELECT Reading.id, " +
+                "Reading.comment, " +
+                "Reading.customer, " +
+                "Reading.dateOfReading, " +
+                "Reading.kindOfMeter, " +
+                "Reading.meterCount, " +
+                "Reading.meterId, " +
+                "Reading.substitute, " +
+                "Customer.id, " +
+                "Customer.firstName, " +
+                "Customer.lastName, " +
+                "Customer.birthDate, " +
+                "Customer.gender " +
+                "FROM Reading " +
+                "JOIN Customer ON Reading.customer=Customer.id " +
+                "WHERE Reading.id = ?";
 
         try (PreparedStatement statement = connection.prepareStatement(sql)){
             statement.setObject(1, id);
 
             try (ResultSet resultSet = statement.executeQuery()) {
+                //logger.debug("Search for {} returned {} rows", id, resultSet.getString("kindOfMeter"));
                 if (resultSet.next()) {
-                  String comment = resultSet.getString("comment");
-                  ICustomer customer = resultSet.getObject("costumer", ICustomer.class);
-                  LocalDate dateOfReading = resultSet.getObject("dateOfReading", LocalDate.class);
-                  String kindOfMeterString = resultSet.getString("kindOfMeter");
-                  KindOfMeter kindOfMeter = KindOfMeter.valueOf(kindOfMeterString);
-                  double meterCount = resultSet.getDouble("meterCount");
-                  String meterId = resultSet.getString("meterId");
-                  boolean substitute = resultSet.getBoolean("substitute");
-
-                  return new Reading(id,comment, customer, dateOfReading, kindOfMeter, meterCount, meterId, substitute);
+                  return new Reading(
+                          resultSet.getObject("Reading.id", UUID.class),
+                          resultSet.getString("Reading.comment"),
+                          new Customer(resultSet.getObject(
+                                  "Customer.id", UUID.class),
+                                  resultSet.getString("Customer.firstName"),
+                                  resultSet.getString("Customer.lastName"),
+                                  Gender.valueOf(resultSet.getString("Customer.gender")),
+                                  resultSet.getObject("Customer.birthDate", LocalDate.class)
+                          ),
+                          resultSet.getObject("Reading.dateOfReading", LocalDate.class),
+                          KindOfMeter.valueOf(resultSet.getString("Reading.kindOfMeter")),
+                          resultSet.getDouble("Reading.meterCount"),
+                          resultSet.getString("Reading.meterId"),
+                          resultSet.getBoolean("Reading.substitute")
+                  );
                 }
                 else {
                     return null;
@@ -109,5 +133,94 @@ public class ReadingDao implements IDao<Reading> {
         }catch (SQLException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public List<Reading> find(UUID customerId, LocalDate startDate, LocalDate endDate, KindOfMeter kindOfMeter){
+        List<Reading> results = new ArrayList<>();
+        StringBuilder sql = new StringBuilder(
+                "SELECT Reading.id, " +
+                        "Reading.comment, " +
+                        "Reading.customer, " +
+                        "Reading.dateOfReading, " +
+                        "Reading.kindOfMeter, " +
+                        "Reading.meterCount, " +
+                        "Reading.meterId, " +
+                        "Reading.substitute, " +
+                        "Customer.id, " +
+                        "Customer.firstName, " +
+                        "Customer.lastName, " +
+                        "Customer.birthDate, " +
+                        "Customer.gender " +
+                        "FROM Reading " +
+                        "JOIN Customer ON Reading.customer=Customer.id "
+        );
+
+        String customerIdQuery = "Reading.customer = ? ";
+        String startDateQuery = "Reading.dateOfReading >= ? ";
+        String endDateQuery = "Reading.dateOfReading <= ? ";
+        String kindOfMeterQuery = "Reading.kindOfMeter = ? ";
+
+        int customerIdIndex = 0;
+        int startDateIndex = 0;
+        int endDateIndex = 0;
+        int kindOfMeterIndex = 0;
+
+        int parameterIndex = 1;
+
+        if (customerId != null){
+            sql.append("WHERE ").append(customerIdQuery);
+            customerIdIndex = parameterIndex++;
+        }
+        if (startDate != null){
+            sql.append(parameterIndex == 1 ? "WHERE " : "AND ").append(startDateQuery);
+            startDateIndex = parameterIndex++;
+        }
+        if (endDate != null){
+            sql.append(parameterIndex == 1 ? "WHERE " : "AND ").append(endDateQuery);
+            endDateIndex = parameterIndex++;
+        }
+        if (kindOfMeter != null){
+            sql.append(parameterIndex == 1 ? "WHERE " : "AND ").append(kindOfMeterQuery);
+            kindOfMeterIndex = parameterIndex;
+        }
+
+        try (PreparedStatement statement = connection.prepareStatement(sql.toString())){
+
+            if (customerId != null) {
+                statement.setObject(customerIdIndex, customerId);
+            }
+            if (startDate != null) {
+                statement.setObject(startDateIndex, startDate);
+            }
+            if (endDate != null) {
+                statement.setObject(endDateIndex, endDate);
+            }
+            if (kindOfMeter != null) {
+                statement.setString(kindOfMeterIndex, kindOfMeter.name());
+            }
+
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next())
+                    results.add(new Reading(
+                            resultSet.getObject("Reading.id", UUID.class),
+                            resultSet.getString("Reading.comment"),
+                            new Customer(resultSet.getObject(
+                                    "Customer.id", UUID.class),
+                                    resultSet.getString("Customer.firstName"),
+                                    resultSet.getString("Customer.lastName"),
+                                    Gender.valueOf(resultSet.getString("Customer.gender")),
+                                    resultSet.getObject("Customer.birthDate", LocalDate.class)
+                            ),
+                            resultSet.getObject("Reading.dateOfReading", LocalDate.class),
+                            KindOfMeter.valueOf(resultSet.getString("Reading.kindOfMeter")),
+                            resultSet.getDouble("Reading.meterCount"),
+                            resultSet.getString("Reading.meterId"),
+                            resultSet.getBoolean("Reading.substitute")
+                    ));
+            }
+        }catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+            return results;
     }
 }

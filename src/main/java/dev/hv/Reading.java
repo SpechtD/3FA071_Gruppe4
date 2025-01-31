@@ -1,5 +1,6 @@
 package dev.hv;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import dev.hv.model.ICustomer;
 import dev.hv.model.IId;
 import dev.hv.model.IReading;
@@ -13,6 +14,7 @@ public class Reading implements IReading, IId {
     private UUID id;
     private String comment;
     private ICustomer customer;
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate dateOfReading;
     private KindOfMeter kindOfMeter;
     private double meterCount;
