@@ -16,14 +16,12 @@ import java.util.Properties;
 public class DbConnection implements IDatabaseConnection {
 
     private Connection connection;
-
     private static DbConnection INSTANCE;
     private static final String DB_Properties = "/db.properties";
     static MariaDBContainer<?> mariaDb;
+    private static final Logger logger = LogManager.getLogger(DbConnection.class); //Hier werden meine Objekte instanziieren
 
-    private static final Logger logger = LogManager.getLogger(DbConnection.class);
-
-    private DbConnection() {
+    private DbConnection() { //Konstruktor
     }
 
     public static DbConnection getInstance() {
@@ -41,7 +39,6 @@ public class DbConnection implements IDatabaseConnection {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
         return prop;
     }
 
@@ -50,11 +47,10 @@ public class DbConnection implements IDatabaseConnection {
     }
 
     @Override
-    public IDatabaseConnection openConnection(Properties properties) {
+    public IDatabaseConnection openConnection(Properties properties) { //wieso nicht prop mitgegeben?
         //if (connection == null || connection.isClosed()) {
 
         String username = System.getProperty("user.name");
-
         String dbUrl = properties.getProperty(username + ".db.url");
         String dbUser = properties.getProperty(username + ".db.user");
         String dbPassword = properties.getProperty(username + ".db.psw", "");
