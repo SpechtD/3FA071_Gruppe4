@@ -2,6 +2,7 @@ package dev.hv.services;
 
 import dev.hv.Customer;
 import dev.hv.Reading;
+import dev.hv.dao.DbConnection;
 import dev.hv.model.Gender;
 import dev.hv.model.KindOfMeter;
 
@@ -9,6 +10,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -25,12 +29,18 @@ public class CSVReader {
         String meterId = "";
         KindOfMeter kindOfMeter = KindOfMeter.UNBEKANNT;
 
+        final Connection con = DbConnection.getInstance().getConnection();
+
+        String query =  "INSERT INTO Reading (id, comment, customer, dateOfReading, kindOfMeter, meterCount, meterId, substitute) " +
+                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+
         // Read the file and split the lines into rows and columns and remove double quotes
-        try (BufferedReader reader = Files.newBufferedReader(filePath)) {
+        try (BufferedReader reader = Files.newBufferedReader(filePath);
+             PreparedStatement ps = con.prepareStatement(query)) {
             lines = reader.lines()
                     .map(line -> Arrays.asList(line.replace("\"", "").split(";", 3)))
                     .toList();
-        } catch (IOException e) {
+        } catch (IOException | SQLException e) {
             throw new RuntimeException(e);
         }
 
