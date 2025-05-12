@@ -71,6 +71,7 @@ public class DbConnection implements IDatabaseConnection {
         }
 
         try {
+            logger.info(dbUrl);
             connection = DriverManager.getConnection(dbUrl, dbUser, dbPassword);
             logger.debug("Successfully connected to database at: {} as {}", dbUrl, dbPassword);
         } catch (SQLException e) {
