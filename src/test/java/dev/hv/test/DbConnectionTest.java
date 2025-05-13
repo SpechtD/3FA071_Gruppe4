@@ -18,16 +18,14 @@ class DbConnectionTest {
     @BeforeEach
     void setUp() {
         dbConnection = DbConnection.getInstance();
-
-        // Getting Username
         String username = System.getProperty("user.name");
-
-        // Setting DB Properties
+        
+        // Setting DB Properties correctly
         testProperties = new Properties();
-        testProperties.getProperty(username + ".db.url");
-        testProperties.getProperty(username + ".db.user");
-        testProperties.getProperty(username + ".db.psw", "");
-
+        testProperties.getProperty(username + ".db.url", "");  // Leave empty to trigger TestContainer
+        testProperties.getProperty(username + ".db.user", ""); // Leave empty to trigger TestContainer
+        testProperties.getProperty(username + ".db.psw", "");  // Leave empty to trigger TestContainer
+        
         // Open DB Connection with user properties
         dbConnection.openConnection(testProperties);
     }
@@ -52,11 +50,23 @@ class DbConnectionTest {
     void testCreateAllTables() {
         dbConnection.createAllTables();
 
-        // Check if tables exist
-        try (ResultSet rs = dbConnection.getConnection().getMetaData().getTables(null, null, "CUSTOMER", null)) {
-            assertTrue(rs.next(), "Customer table should be created");
-        } catch (SQLException e) {
-            fail("SQL Exception occurred while checking table existence: " + e.getMessage());
+        // Array of expected table names
+        String[] expectedTables = {"Customer", "Reading"}; 
+
+        for (String tableName : expectedTables) {
+            try (ResultSet rs = dbConnection.getConnection().getMetaData().getTables(
+                    null, null, "%", new String[]{"TABLE"})) {
+                boolean found = false;
+                while (rs.next()) {
+                    if (rs.getString("TABLE_NAME").equalsIgnoreCase(tableName)) {
+                        found = true;
+                        break;
+                    }
+                }
+                assertTrue(found, "Table '" + tableName + "' should be created");
+            } catch (SQLException e) {
+                fail("SQL Exception occurred while checking table existence: " + e.getMessage());
+            }
         }
     }
 
