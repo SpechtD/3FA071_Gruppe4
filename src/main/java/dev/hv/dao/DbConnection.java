@@ -120,16 +120,13 @@ public class DbConnection implements IDatabaseConnection {
         }
     }
 
-    @Override
+  @Override
     public void truncateAllTables() {
-        String truncatealltables = 
-            "SET FOREIGN_KEY_CHECKS=0; " +
-            "TRUNCATE TABLE Customer; " +
-            "TRUNCATE TABLE Reading; " +
-            "SET FOREIGN_KEY_CHECKS=1;";
-
         try (Statement stmt = connection.createStatement()) {
-            stmt.executeUpdate(truncatealltables);
+        stmt.executeUpdate("SET FOREIGN_KEY_CHECKS=0;");
+        stmt.executeUpdate("TRUNCATE TABLE Reading;");
+        stmt.executeUpdate("TRUNCATE TABLE Customer;");
+        stmt.executeUpdate("SET FOREIGN_KEY_CHECKS=1;");
         } catch (SQLException e) {
             throw new RuntimeException("truncateAllTables wasn't successful: " + e);
         }
