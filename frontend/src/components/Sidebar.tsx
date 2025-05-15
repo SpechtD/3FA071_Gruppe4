@@ -38,7 +38,6 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
     // Main section
     { title: "Dashboard", icon: LayoutDashboard, path: "/", section: "main" },
     { title: "Import Data", icon: Import, path: "/import", section: "main" },
-    { title: "Import Guides", icon: FileQuestion, path: "/import-guides", section: "main" }, // New Import Guides link
     { title: "Export Data", icon: FileOutput, path: "/export", section: "main" },
     
     // Data section
