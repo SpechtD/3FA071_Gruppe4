@@ -1,8 +1,15 @@
+
 import * as React from "react"
 import * as ProgressPrimitive from "@radix-ui/react-progress"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * Progress Component
+ * 
+ * A customizable progress bar component based on Radix UI's Progress primitive.
+ * Used to display completion percentage for various operations like file uploads.
+ */
 const Progress = React.forwardRef<
   React.ElementRef<typeof ProgressPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof ProgressPrimitive.Root>

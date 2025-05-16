@@ -33,10 +33,12 @@ test.describe('Application setup', () => {
     // Check for all expected navigation links
     await expect(page.getByRole('link', { name: /dashboard/i })).toBeVisible();
     await expect(page.getByRole('link', { name: /import data/i })).toBeVisible();
-    await expect(page.getByRole('link', { name: /import guides/i })).toBeVisible();
     await expect(page.getByRole('link', { name: /export data/i })).toBeVisible();
     await expect(page.getByRole('link', { name: /meters/i })).toBeVisible();
     await expect(page.getByRole('link', { name: /customers/i })).toBeVisible();
     await expect(page.getByRole('link', { name: /imprint/i })).toBeVisible();
+    
+    // Import Guides link should not be present
+    await expect(page.getByRole('link', { name: /import guides/i })).not.toBeVisible();
   });
 });

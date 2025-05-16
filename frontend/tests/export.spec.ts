@@ -1,57 +1,94 @@
 
 import { test, expect } from '@playwright/test';
 
+/**
+ * Test suite for the Export page
+ * 
+ * These tests verify that the export functionality works correctly,
+ * including UI elements, format selection, and conditional display.
+ */
 test.describe('Export page', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/export');
   });
 
-  test('should display export tabs', async ({ page }) => {
-    // Check for tabs
-    await expect(page.getByRole('tab', { name: 'Meter Reports' })).toBeVisible();
-    await expect(page.getByRole('tab', { name: 'Customer Reports' })).toBeVisible();
-    await expect(page.getByRole('tab', { name: 'Export Settings' })).toBeVisible();
+  /**
+   * Test that all export options and UI elements are displayed correctly
+   */
+  test('should display export options', async ({ page }) => {
+    // Check for headers
+    await expect(page.getByRole('heading', { name: 'Export Data' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Export Options' })).toBeVisible();
     
-    // Meter Reports should be selected by default
-    await expect(page.getByRole('tab', { name: 'Meter Reports' })).toHaveAttribute('aria-selected', 'true');
+    // Check for data type selector
+    await expect(page.getByLabel('Data Type')).toBeVisible();
+    
+    // Check for format buttons
+    await expect(page.getByRole('button', { name: 'CSV' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'JSON' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'XML' })).toBeVisible();
+    
+    // Check for date range picker
+    await expect(page.getByLabel('Date Range (Optional)')).toBeVisible();
+    
+    // Check export button
+    await expect(page.getByRole('button', { name: 'Export Data' })).toBeVisible();
   });
 
-  test('should conditionally show meter selector only in Meter Reports tab', async ({ page }) => {
-    // In Meter Reports tab, selector should be visible
-    await expect(page.getByRole('tab', { name: 'Meter Reports' })).toHaveAttribute('aria-selected', 'true');
-    await expect(page.getByLabel('Select Meter:')).toBeVisible();
+  /**
+   * Test that meter selector is conditionally displayed only when meter readings are selected
+   */
+  test('should conditionally show meter selector only when meter readings are selected', async ({ page }) => {
+    // Meter type should not be visible initially
+    await expect(page.getByLabel('Meter Type (Optional)')).not.toBeVisible();
     
-    // Switch to Customer Reports tab
-    await page.getByRole('tab', { name: 'Customer Reports' }).click();
+    // Select readings data type
+    await page.getByRole('combobox', { name: 'Data Type' }).click();
+    await page.getByRole('option', { name: 'Meter Readings' }).click();
     
-    // Meter selector should be hidden
-    await expect(page.getByLabel('Select Meter:')).not.toBeVisible();
+    // Meter type should be visible
+    await expect(page.getByLabel('Meter Type (Optional)')).toBeVisible();
     
-    // Switch to Export Settings tab
-    await page.getByRole('tab', { name: 'Export Settings' }).click();
+    // Select customers data type
+    await page.getByRole('combobox', { name: 'Data Type' }).click();
+    await page.getByRole('option', { name: 'Customers' }).click();
     
-    // Meter selector should still be hidden
-    await expect(page.getByLabel('Select Meter:')).not.toBeVisible();
+    // Meter type should not be visible
+    await expect(page.getByLabel('Meter Type (Optional)')).not.toBeVisible();
   });
 
-  test('should show export format options', async ({ page }) => {
-    // Check for format options
-    await expect(page.getByRole('radio', { name: 'CSV' })).toBeVisible();
-    await expect(page.getByRole('radio', { name: 'Excel' })).toBeVisible();
-    await expect(page.getByRole('radio', { name: 'PDF' })).toBeVisible();
+  /**
+   * Test that export format buttons work correctly
+   */
+  test('should show export format buttons', async ({ page }) => {
+    // Check for format buttons
+    const csvButton = page.getByRole('button', { name: 'CSV' });
+    const jsonButton = page.getByRole('button', { name: 'JSON' });
+    const xmlButton = page.getByRole('button', { name: 'XML' });
     
-    // Default should be selected
-    await expect(page.getByRole('radio', { name: 'CSV' })).toBeChecked();
+    await expect(csvButton).toBeVisible();
+    await expect(jsonButton).toBeVisible();
+    await expect(xmlButton).toBeVisible();
+    
+    // CSV should be selected by default (has default variant)
+    await expect(csvButton).toHaveClass(/bg-primary/);
     
     // Can change format
-    await page.getByRole('radio', { name: 'Excel' }).click();
-    await expect(page.getByRole('radio', { name: 'Excel' })).toBeChecked();
+    await jsonButton.click();
+    await expect(jsonButton).toHaveClass(/bg-primary/);
+    await expect(csvButton).not.toHaveClass(/bg-primary/);
   });
 
-  test('should allow date range selection', async ({ page }) => {
-    // Check for date range options
-    await expect(page.getByText('Date Range:')).toBeVisible();
-    await expect(page.getByText('Start Date:')).toBeVisible();
-    await expect(page.getByText('End Date:')).toBeVisible();
+  /**
+   * Test that export templates are displayed
+   */
+  test('should show export templates', async ({ page }) => {
+    // Check for export templates section
+    await expect(page.getByRole('heading', { name: 'Export Templates' })).toBeVisible();
+    
+    // Check for template cards
+    await expect(page.getByRole('heading', { name: 'All Customers (CSV)' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Electricity Readings (JSON)' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'All Readings (XML)' })).toBeVisible();
   });
 });

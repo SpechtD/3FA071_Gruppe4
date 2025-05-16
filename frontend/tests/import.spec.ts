@@ -1,11 +1,20 @@
 
 import { test, expect } from '@playwright/test';
 
+/**
+ * Test suite for the Import page
+ * 
+ * These tests verify that the import functionality works correctly,
+ * including UI elements and modals for file selection.
+ */
 test.describe('Import page', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/import');
   });
 
+  /**
+   * Test that import cards are displayed correctly
+   */
   test('should display import cards', async ({ page }) => {
     // Check for customer import card
     await expect(page.getByRole('heading', { name: 'Import Customer Data' })).toBeVisible();
@@ -22,12 +31,34 @@ test.describe('Import page', () => {
     await expect(page.getByRole('button', { name: 'Upload Meter Readings' })).toBeVisible();
   });
 
-  test('should navigate to import guides', async ({ page }) => {
-    // Click import guides button
-    await page.getByRole('button', { name: /view import guides/i }).click();
+  /**
+   * Test that file selection modals open correctly
+   */
+  test('should open file selection modals', async ({ page }) => {
+    // Open customer import modal
+    await page.getByRole('button', { name: 'Select File' }).first().click();
     
-    // Should be on import guides page
-    await expect(page).toHaveURL(/\/import-guides/);
-    await expect(page.getByRole('heading', { name: 'Import Guides' })).toBeVisible();
+    // Check modal content
+    await expect(page.getByRole('dialog')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Import Customer Data' })).toBeVisible();
+    await expect(page.getByLabel('File Format')).toBeVisible();
+    await expect(page.getByLabel('Upload File')).toBeVisible();
+    
+    // Close modal
+    await page.getByRole('button', { name: 'Cancel' }).click();
+    await expect(page.getByRole('dialog')).not.toBeVisible();
+    
+    // Open meter readings import modal
+    await page.getByRole('button', { name: 'Select File' }).nth(1).click();
+    
+    // Check modal content
+    await expect(page.getByRole('dialog')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Import Meter Readings' })).toBeVisible();
+    await expect(page.getByLabel('File Format')).toBeVisible();
+    await expect(page.getByLabel('Upload File')).toBeVisible();
+    
+    // Close modal
+    await page.getByRole('button', { name: 'Cancel' }).click();
+    await expect(page.getByRole('dialog')).not.toBeVisible();
   });
 });

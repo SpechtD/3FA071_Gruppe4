@@ -4,7 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/dashboard";
+import Dashboard from "./pages/Dashboard";
 import Import from "./pages/Import";
 import ImportGuides from "./pages/ImportGuides"; 
 import Export from "./pages/Export";
@@ -46,7 +46,7 @@ const App = () => (
           <div className="flex-1 overflow-auto">
             <Routes>
               {/* Dashboard/home page */}
-              <Route path="/" element={<Index />} />
+              <Route path="/" element={<Dashboard />} />
               
               {/* Data management routes */}
               <Route path="/import" element={<Import />} />
