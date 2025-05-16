@@ -71,6 +71,7 @@ public class DbConnection implements IDatabaseConnection {
         }
 
         try {
+            logger.info(dbUrl);
             connection = DriverManager.getConnection(dbUrl, dbUser, dbPassword);
             logger.debug("Successfully connected to database at: {} as {}", dbUrl, dbPassword);
         } catch (SQLException e) {
@@ -82,37 +83,53 @@ public class DbConnection implements IDatabaseConnection {
 
     @Override
     public void createAllTables() {
-        String createCustomer = "CREATE TABLE IF NOT EXISTS Customer " +
-                "(id UUID PRIMARY KEY NOT NULL, " +
+      
+        if (connection == null) {
+            logger.error("Database connection is null");
+            throw new RuntimeException("Database connection is not established");
+        }
+        
+        try (Statement stmt = connection.createStatement()) {
+            String createCustomer =
+                "CREATE TABLE IF NOT EXISTS Customer (" +
+                "id VARCHAR(255) PRIMARY KEY NOT NULL, " +
                 "firstName VARCHAR(50) NOT NULL, " +
                 "lastName VARCHAR(50) NOT NULL, " +
                 "birthDate DATE, " +
-                "gender VARCHAR(1))";
-        String createReading = "CREATE TABLE IF NOT EXISTS Reading " +
-                "(id UUID PRIMARY KEY NOT NULL," +
-                "comment VARCHAR(255) NOT NULL," +
-                "customer UUID NOT NULL," +
-                "dateOfReading DATE DEFAULT CURRENT_DATE," +
-                "kindOfMeter VARCHAR(50)," +
-                "meterCount DOUBLE," +
-                "meterId VARCHAR(50) NOT NULL," +
-                "substitute BIT)";
-
-        try (Statement stmt = connection.createStatement()) {
+                "gender CHAR(1))";
+            String createReading =
+                "CREATE TABLE IF NOT EXISTS Reading (" +
+                "id VARCHAR(255) PRIMARY KEY NOT NULL, " +
+                "comment VARCHAR(255) NOT NULL, " +
+                "customer VARCHAR(255) NOT NULL, " +
+                "dateOfReading DATE DEFAULT CURRENT_DATE, " +
+                "kindOfMeter VARCHAR(50) NOT NULL, " +
+                "meterCount DOUBLE, " +
+                "substitute BIT, " +
+                "type VARCHAR(50), " +
+                "FOREIGN KEY (customer) REFERENCES Customer(id))";
+            logger.info("Creating Customer table...");
             stmt.executeUpdate(createCustomer);
+            logger.info("Customer table created successfully");
+            
+            logger.info("Creating Reading table...");
             stmt.executeUpdate(createReading);
+            logger.info("Reading table created successfully");
+
         } catch (SQLException e) {
+            logger.error("Failed to create tables: {}", e.getMessage());
             throw new RuntimeException("createAllTables wasn't successful: " + e);
         }
     }
 
-    @Override
+  @Override
     public void truncateAllTables() {
-        String truncateAllTables =
-                "TRUNCATE TABLE Reading, Customer";
-
         try (Statement stmt = connection.createStatement()) {
-            stmt.executeUpdate(truncateAllTables);
+        stmt.executeUpdate("SET FOREIGN_KEY_CHECKS=0;");
+        stmt.executeUpdate("TRUNCATE TABLE Reading;");
+        stmt.executeUpdate("TRUNCATE TABLE Customer;");
+        stmt.executeUpdate("SET FOREIGN_KEY_CHECKS=1;");
+
         } catch (SQLException e) {
             throw new RuntimeException("truncateAllTables wasn't successful: " + e);
         }
@@ -120,7 +137,8 @@ public class DbConnection implements IDatabaseConnection {
 
     @Override
     public void removeAllTables() {
-        String removeAllTables =
+        String removealltables = 
+
                 "DROP TABLE IF EXISTS Reading, Customer";
 
         try (Statement stmt = connection.createStatement()) {
