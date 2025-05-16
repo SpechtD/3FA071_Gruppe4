@@ -83,35 +83,35 @@ public class DbConnection implements IDatabaseConnection {
 
     @Override
     public void createAllTables() {
-      
+
         if (connection == null) {
             logger.error("Database connection is null");
             throw new RuntimeException("Database connection is not established");
         }
-        
+
         try (Statement stmt = connection.createStatement()) {
             String createCustomer =
-                "CREATE TABLE IF NOT EXISTS Customer (" +
-                "id VARCHAR(255) PRIMARY KEY NOT NULL, " +
-                "firstName VARCHAR(50) NOT NULL, " +
-                "lastName VARCHAR(50) NOT NULL, " +
-                "birthDate DATE, " +
-                "gender CHAR(1))";
+                    "CREATE TABLE IF NOT EXISTS Customer (" +
+                            "id VARCHAR(255) PRIMARY KEY NOT NULL, " +
+                            "firstName VARCHAR(50) NOT NULL, " +
+                            "lastName VARCHAR(50) NOT NULL, " +
+                            "birthDate DATE, " +
+                            "gender CHAR(1))";
             String createReading =
-                "CREATE TABLE IF NOT EXISTS Reading (" +
-                "id VARCHAR(255) PRIMARY KEY NOT NULL, " +
-                "comment VARCHAR(255) NOT NULL, " +
-                "customer VARCHAR(255) NOT NULL, " +
-                "dateOfReading DATE DEFAULT CURRENT_DATE, " +
-                "kindOfMeter VARCHAR(50) NOT NULL, " +
-                "meterCount DOUBLE, " +
-                "substitute BIT, " +
-                "type VARCHAR(50), " +
-                "FOREIGN KEY (customer) REFERENCES Customer(id))";
+                    "CREATE TABLE IF NOT EXISTS Reading (" +
+                            "id VARCHAR(255) PRIMARY KEY NOT NULL, " +
+                            "comment VARCHAR(255) NOT NULL, " +
+                            "customer VARCHAR(255) NOT NULL, " +
+                            "dateOfReading DATE DEFAULT CURRENT_DATE, " +
+                            "kindOfMeter VARCHAR(50) NOT NULL, " +
+                            "meterCount DOUBLE, " +
+                            "substitute BIT, " +
+                            "type VARCHAR(50), " +
+                            "FOREIGN KEY (customer) REFERENCES Customer(id))";
             logger.info("Creating Customer table...");
             stmt.executeUpdate(createCustomer);
             logger.info("Customer table created successfully");
-            
+
             logger.info("Creating Reading table...");
             stmt.executeUpdate(createReading);
             logger.info("Reading table created successfully");
@@ -122,13 +122,13 @@ public class DbConnection implements IDatabaseConnection {
         }
     }
 
-  @Override
+    @Override
     public void truncateAllTables() {
         try (Statement stmt = connection.createStatement()) {
-        stmt.executeUpdate("SET FOREIGN_KEY_CHECKS=0;");
-        stmt.executeUpdate("TRUNCATE TABLE Reading;");
-        stmt.executeUpdate("TRUNCATE TABLE Customer;");
-        stmt.executeUpdate("SET FOREIGN_KEY_CHECKS=1;");
+            stmt.executeUpdate("SET FOREIGN_KEY_CHECKS=0;");
+            stmt.executeUpdate("TRUNCATE TABLE Reading;");
+            stmt.executeUpdate("TRUNCATE TABLE Customer;");
+            stmt.executeUpdate("SET FOREIGN_KEY_CHECKS=1;");
 
         } catch (SQLException e) {
             throw new RuntimeException("truncateAllTables wasn't successful: " + e);
@@ -137,7 +137,7 @@ public class DbConnection implements IDatabaseConnection {
 
     @Override
     public void removeAllTables() {
-        String removealltables = 
+        String removeAllTables =
 
                 "DROP TABLE IF EXISTS Reading, Customer";
 
