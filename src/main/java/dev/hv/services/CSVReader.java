@@ -54,7 +54,7 @@ public class CSVReader {
                                     case "Zählerstand in m³" -> KindOfMeter.WASSER;
                                     case "Zählerstand in kWh" -> KindOfMeter.STROM;
                                     default -> KindOfMeter.UNBEKANNT;
-                                }).toString()); // Kind of meter
+                                }).name()); // Kind of meter
 
 
                                 default -> {

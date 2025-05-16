@@ -15,146 +15,129 @@ import java.util.Properties;
 
 public class DbConnection implements IDatabaseConnection {
 
-    private Connection connection;
+  private Connection connection;
 
-    private static DbConnection INSTANCE;
-    private static final String DB_Properties = "/db.properties";
-    static MariaDBContainer<?> mariaDb;
+  private static DbConnection INSTANCE;
+  private static final String DB_Properties = "/db.properties";
+  static MariaDBContainer<?> mariaDb;
 
-    private static final Logger logger = LogManager.getLogger(DbConnection.class);
+  private static final Logger logger = LogManager.getLogger(DbConnection.class);
 
-    private DbConnection() {
+  private DbConnection() {
+  }
+
+  public static DbConnection getInstance() {
+    if (INSTANCE == null) {
+      INSTANCE = new DbConnection();
+    }
+    return INSTANCE;
+  }
+
+  public static Properties getLoginProperties() {
+
+    final Properties prop = new Properties();
+    try {
+      prop.load(DbConnection.class.getResourceAsStream(DB_Properties));
+    } catch (IOException e) {
+      throw new RuntimeException(e);
     }
 
-    public static DbConnection getInstance() {
-        if (INSTANCE == null) {
-            INSTANCE = new DbConnection();
-        }
-        return INSTANCE;
+    return prop;
+  }
+
+  public Connection getConnection() {
+    return connection;
+  }
+
+  @Override
+  public IDatabaseConnection openConnection(Properties properties) {
+    // if (connection == null || connection.isClosed()) {
+
+    String username = System.getProperty("user.name");
+
+    String dbUrl = "";
+    String dbUser = "";
+    String dbPassword = "";
+
+    if (properties != null) {
+      dbUrl = properties.getProperty(username + ".db.url");
+      dbUser = properties.getProperty(username + ".db.user");
+      dbPassword = properties.getProperty(username + ".db.psw", "");
     }
 
-    public static Properties getLoginProperties() {
-
-        final Properties prop = new Properties();
-        try {
-            prop.load(DbConnection.class.getResourceAsStream(DB_Properties));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        return prop;
+    if (dbUrl == null || dbUrl.isEmpty() || dbUser == null || dbUser.isEmpty()) {
+      logger.debug("db.url or db.user not set! Using Testcontainers.");
+      mariaDb = new MariaDBContainer<>(
+          DockerImageName.parse("library/mariadb:11.4.4").asCompatibleSubstituteFor("mariadb"));
+      mariaDb.start();
+      dbUrl = mariaDb.getJdbcUrl();
+      dbUser = mariaDb.getUsername();
+      dbPassword = mariaDb.getPassword();
     }
 
-    public Connection getConnection() {
-        return connection;
+    try {
+      connection = DriverManager.getConnection(dbUrl, dbUser, dbPassword);
+      logger.debug("Successfully connected to database at: {} as {}", dbUrl, dbPassword);
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
     }
+    // }
+    return this;
+  }
 
-    @Override
-    public IDatabaseConnection openConnection(Properties properties) {
-        //if (connection == null || connection.isClosed()) {
+  @Override
+  public void createAllTables() {
+    String createCustomer = "CREATE TABLE IF NOT EXISTS Customer " +
+        "(id UUID PRIMARY KEY NOT NULL, " +
+        "firstName VARCHAR(50) NOT NULL, " +
+        "lastName VARCHAR(50) NOT NULL, " +
+        "birthDate DATE, " +
+        "gender VARCHAR(1))";
+    String createReading = "CREATE TABLE IF NOT EXISTS Reading " +
+        "(id UUID PRIMARY KEY NOT NULL," +
+        "comment VARCHAR(255) NOT NULL," +
+        "customer UUID NOT NULL," +
+        "dateOfReading DATE DEFAULT CURRENT_DATE," +
+        "kindOfMeter VARCHAR(50)," +
+        "meterCount DOUBLE," +
+        "meterId VARCHAR(50) NOT NULL," +
+        "substitute BIT)";
 
-        String username = System.getProperty("user.name");
-
-        String dbUrl = properties.getProperty(username + ".db.url");
-        String dbUser = properties.getProperty(username + ".db.user");
-        String dbPassword = properties.getProperty(username + ".db.psw", "");
-
-        if (dbUrl == null || dbUser == null) {
-            logger.debug("db.url or db.user not set! Using Testcontainers.");
-            mariaDb = new MariaDBContainer<>(
-                    DockerImageName.parse("library/mariadb:11.4.4").asCompatibleSubstituteFor("mariadb")
-            );
-            mariaDb.start();
-            dbUrl = mariaDb.getJdbcUrl();
-            dbUser = mariaDb.getUsername();
-            dbPassword = mariaDb.getPassword();
-        }
-
-        try {
-            logger.info(dbUrl);
-            connection = DriverManager.getConnection(dbUrl, dbUser, dbPassword);
-            logger.debug("Successfully connected to database at: {} as {}", dbUrl, dbPassword);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-        // }
-        return this;
+    try (Statement stmt = connection.createStatement()) {
+      stmt.executeUpdate(createCustomer);
+      stmt.executeUpdate(createReading);
+    } catch (SQLException e) {
+      throw new RuntimeException("createAllTables wasn't successful: " + e);
     }
+  }
 
-    @Override
-    public void createAllTables() {
+  @Override
+  public void truncateAllTables() {
+    String truncateAllTables = "TRUNCATE TABLE Reading, Customer";
 
-        if (connection == null) {
-            logger.error("Database connection is null");
-            throw new RuntimeException("Database connection is not established");
-        }
-
-        try (Statement stmt = connection.createStatement()) {
-            String createCustomer =
-                    "CREATE TABLE IF NOT EXISTS Customer (" +
-                            "id VARCHAR(255) PRIMARY KEY NOT NULL, " +
-                            "firstName VARCHAR(50) NOT NULL, " +
-                            "lastName VARCHAR(50) NOT NULL, " +
-                            "birthDate DATE, " +
-                            "gender CHAR(1))";
-            String createReading =
-                    "CREATE TABLE IF NOT EXISTS Reading (" +
-                            "id VARCHAR(255) PRIMARY KEY NOT NULL, " +
-                            "comment VARCHAR(255) NOT NULL, " +
-                            "customer VARCHAR(255) NOT NULL, " +
-                            "dateOfReading DATE DEFAULT CURRENT_DATE, " +
-                            "kindOfMeter VARCHAR(50) NOT NULL, " +
-                            "meterCount DOUBLE, " +
-                            "substitute BIT, " +
-                            "type VARCHAR(50), " +
-                            "FOREIGN KEY (customer) REFERENCES Customer(id))";
-            logger.info("Creating Customer table...");
-            stmt.executeUpdate(createCustomer);
-            logger.info("Customer table created successfully");
-
-            logger.info("Creating Reading table...");
-            stmt.executeUpdate(createReading);
-            logger.info("Reading table created successfully");
-
-        } catch (SQLException e) {
-            logger.error("Failed to create tables: {}", e.getMessage());
-            throw new RuntimeException("createAllTables wasn't successful: " + e);
-        }
+    try (Statement stmt = connection.createStatement()) {
+      stmt.executeUpdate(truncateAllTables);
+    } catch (SQLException e) {
+      throw new RuntimeException("truncateAllTables wasn't successful: " + e);
     }
+  }
 
-    @Override
-    public void truncateAllTables() {
-        try (Statement stmt = connection.createStatement()) {
-            stmt.executeUpdate("SET FOREIGN_KEY_CHECKS=0;");
-            stmt.executeUpdate("TRUNCATE TABLE Reading;");
-            stmt.executeUpdate("TRUNCATE TABLE Customer;");
-            stmt.executeUpdate("SET FOREIGN_KEY_CHECKS=1;");
+  @Override
+  public void removeAllTables() {
+    String removeAllTables = "DROP TABLE IF EXISTS Reading, Customer";
 
-        } catch (SQLException e) {
-            throw new RuntimeException("truncateAllTables wasn't successful: " + e);
-        }
+    try (Statement stmt = connection.createStatement()) {
+      stmt.executeUpdate(removeAllTables);
+    } catch (SQLException e) {
+      throw new RuntimeException("removeAllTables wasn't successful: " + e);
     }
+  }
 
-    @Override
-    public void removeAllTables() {
-        String removeAllTables =
-
-                "DROP TABLE IF EXISTS Reading, Customer";
-
-        try (Statement stmt = connection.createStatement()) {
-            stmt.executeUpdate(removeAllTables);
-        } catch (SQLException e) {
-            throw new RuntimeException("removeAllTables wasn't successful: " + e);
-        }
+  public void closeConnection() {
+    try {
+      connection.close();
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
     }
-
-    public void closeConnection() {
-        try {
-            connection.close();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
+  }
 }
-
-

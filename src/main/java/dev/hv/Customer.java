@@ -2,6 +2,8 @@ package dev.hv;
 import java.time.LocalDate;
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import dev.hv.model.Gender;
 import dev.hv.model.ICustomer;
 
@@ -10,7 +12,9 @@ public class Customer implements ICustomer {
     private String firstName;
     private String lastName;
     private Gender gender;
-    private LocalDate BirthDate;
+    @JsonSerialize(as = LocalDate.class)
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDate birthDate;
 
     // Constructor
     public Customer(UUID id, String firstName,String lastName, Gender gender, LocalDate BirthDate) {
@@ -18,7 +22,7 @@ public class Customer implements ICustomer {
         this.firstName = firstName;
         this.lastName = lastName;
         this.gender = gender;
-        this.BirthDate = BirthDate;
+        this.birthDate = BirthDate;
     }
 
 
@@ -60,14 +64,14 @@ public class Customer implements ICustomer {
         this.gender = gender;
     }
 
-    // Getter and Setter for BirthDate
+    // Getter and Setter for birthDate
     @Override
     public LocalDate getBirthDate() {
-        return BirthDate;
+        return birthDate;
     }
 
     @Override
     public void setBirthDate(LocalDate BirthDate) {
-        this.BirthDate = BirthDate;
+        this.birthDate = BirthDate;
     }
 }

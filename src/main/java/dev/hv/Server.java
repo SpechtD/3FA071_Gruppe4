@@ -9,21 +9,19 @@ import org.glassfish.jersey.server.ResourceConfig;
 import java.net.URI;
 
 public class Server {
-    static HttpServer server;
+  static HttpServer server;
 
-    private static final Logger logger = LogManager.getLogger(Server.class);
+  private static final Logger logger = LogManager.getLogger(Server.class);
 
+  public static void startServer(String url) {
+    final String pack = "dev.hv.endpoints";
+    logger.debug("Server started on: {}", url);
+    final ResourceConfig rc = new ResourceConfig().packages(pack);
+    server = JdkHttpServerFactory.createHttpServer(URI.create(url), rc);
+  }
 
-    static void startServer(String url){
-        final String pack = "dev.hv.endpoints";
-        logger.debug("Server started on: {}", url);
-        final ResourceConfig rc = new ResourceConfig().packages(pack);
-        server = JdkHttpServerFactory.createHttpServer(URI.create(url), rc);
-    }
-
-    static void stopServer(){
-        server.stop(0);
-    }
+  public static void stopServer() {
+    server.stop(0);
+  }
 
 }
-
