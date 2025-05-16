@@ -1,4 +1,3 @@
-
 import { expect, Page } from '@playwright/test';
 
 /**
@@ -36,3 +35,30 @@ export async function expectPageHeading(page: Page, title: string) {
 export async function navigateVia(page: Page, linkText: string) {
   await page.getByRole('link', { name: new RegExp(linkText, 'i') }).click();
 }
+
+// Mock API responses for tests
+export const mockApiResponses = () => {
+  // Customers mock
+  const mockCustomersResponse = {
+    customers: [
+      { id: "1", firstName: "John", lastName: "Doe", gender: "M", birthDate: "1985-05-15" },
+      { id: "2", firstName: "Jane", lastName: "Smith", gender: "W", birthDate: "1990-10-20" },
+      { id: "3", firstName: "Alex", lastName: "Johnson", gender: "D", birthDate: "1978-03-22" }
+    ]
+  };
+
+  // Setup mocks
+  return {
+    setupMocks: async (page: any) => {
+      await page.route('**/customers', async (route: any) => {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify(mockCustomersResponse)
+        });
+      });
+
+      // Add more route mocks as needed
+    }
+  };
+};

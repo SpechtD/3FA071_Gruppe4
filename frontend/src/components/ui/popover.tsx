@@ -1,8 +1,15 @@
+
 import * as React from "react"
 import * as PopoverPrimitive from "@radix-ui/react-popover"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * Popover Component
+ * 
+ * A popover component based on Radix UI's Popover primitive.
+ * Used for displaying content in a floating panel, like filters.
+ */
 const Popover = PopoverPrimitive.Root
 
 const PopoverTrigger = PopoverPrimitive.Trigger

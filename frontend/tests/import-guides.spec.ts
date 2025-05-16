@@ -3,7 +3,9 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Import Guides page', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/import-guides');
+    // First navigate to import page, then click the View Import Guides button
+    await page.goto('/import');
+    await page.getByRole('button', { name: /view import guides/i }).click();
   });
 
   test('should display guide cards', async ({ page }) => {

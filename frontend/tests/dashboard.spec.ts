@@ -1,38 +1,76 @@
+
 import { test, expect } from '@playwright/test';
 
+/**
+ * Test suite for the Dashboard page
+ * 
+ * These tests verify that the dashboard correctly displays overview data
+ * and provides navigation to other sections of the application.
+ */
 test.describe('Dashboard page', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
   });
 
-  test('should display dashboard stats cards', async ({ page }) => {
-    // Wait for cards to be visible
-    await page.waitForSelector('.card, .grid > div > [class*="Card"]');
-    
-    // Check for three stats cards
-    const statsCards = await page.locator('.card, .grid > div > [class*="Card"]').count();
-    expect(statsCards).toBeGreaterThanOrEqual(3);
-    
-    // Verify total meters card
-    await expect(page.getByText('Total Meters')).toBeVisible();
-    
-    // Verify total usage card
-    await expect(page.getByText('Total Usage')).toBeVisible();
-    await expect(page.getByText('Electricity:')).toBeVisible();
-    await expect(page.getByText('Water:')).toBeVisible();
-    await expect(page.getByText('Heating:')).toBeVisible();
-    
-    // Verify last updated card
-    await expect(page.getByText('Last Updated')).toBeVisible();
+  /**
+   * Test that the dashboard displays key summary cards
+   */
+  test('should display summary cards', async ({ page }) => {
+    // Check for summary card titles
+    await expect(page.getByText('Total Customers')).toBeVisible();
+    await expect(page.getByText('Total Readings')).toBeVisible();
+    await expect(page.getByText('Readings per Customer')).toBeVisible();
+    await expect(page.getByText('Most Common Meter')).toBeVisible();
   });
 
-  test('should display consumption trend charts', async ({ page }) => {
-    // Check heading
-    await expect(page.getByRole('heading', { name: 'Consumption Trends' })).toBeVisible();
+  /**
+   * Test that the tabs function correctly
+   */
+  test('should switch between tabs', async ({ page }) => {
+    // Should display customers tab by default
+    await expect(page.getByText('Recent Customers')).toBeVisible();
     
-    // Check for charts
-    await expect(page.getByText('Electricity Usage')).toBeVisible();
-    await expect(page.getByText('Water Usage')).toBeVisible();
-    await expect(page.getByText('Heating Usage')).toBeVisible();
+    // Switch to readings tab
+    await page.getByRole('tab', { name: 'Readings' }).click();
+    await expect(page.getByText('Recent Readings')).toBeVisible();
+  });
+
+  /**
+   * Test that quick action buttons are present
+   */
+  test('should display quick action buttons', async ({ page }) => {
+    // Check for quick actions section
+    await expect(page.getByText('Quick Actions')).toBeVisible();
+    
+    // Check for action buttons
+    await expect(page.getByRole('button', { name: 'Add Customer' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'New Reading' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Export Data' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Import Data' })).toBeVisible();
+  });
+
+  /**
+   * Test dashboard date range filter
+   */
+  test('should have a date range filter', async ({ page }) => {
+    await expect(page.getByText('Date Range:')).toBeVisible();
+    await expect(page.getByPlaceholder('Pick a date')).toBeVisible();
+  });
+
+  /**
+   * Test navigation from dashboard to other pages
+   */
+  test('should navigate to other pages from dashboard', async ({ page }) => {
+    // Click on "View All Customers" button
+    await page.getByRole('button', { name: 'View All Customers' }).click();
+    await expect(page).toHaveURL('/customers');
+    
+    // Go back to dashboard
+    await page.goto('/');
+    
+    // Switch to readings tab and click view all
+    await page.getByRole('tab', { name: 'Readings' }).click();
+    await page.getByRole('button', { name: 'View All Readings' }).click();
+    await expect(page).toHaveURL('/meters');
   });
 });

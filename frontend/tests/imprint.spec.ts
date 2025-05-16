@@ -14,7 +14,7 @@ test.describe('Imprint page', () => {
     
     // Check for specific company details
     await expect(page.getByText('APT Manager GmbH')).toBeVisible();
-    await expect(page.getByText(/Walter-Sedlmayr-Paltz 6/)).toBeVisible();
-    await expect(page.getByText(/davidspecht@protonmail.com/)).toBeVisible();
+    await expect(page.getByText(/Musterstraße 123/)).toBeVisible();
+    await expect(page.getByText(/info@aptmanager.com/)).toBeVisible();
   });
 });

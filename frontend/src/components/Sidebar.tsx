@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -11,7 +10,6 @@ import {
   ArrowUp,
   ArrowDown,
   Users,
-  FileQuestion,
   FileText
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -33,7 +31,7 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
   const isMobile = useIsMobile();
   const [collapsed, setCollapsed] = useState(false);
 
-  // Updated navigation items with sections
+  // Updated navigation items with sections - removed Import Guides
   const navigationItems: SidebarItem[] = [
     // Main section
     { title: "Dashboard", icon: LayoutDashboard, path: "/", section: "main" },

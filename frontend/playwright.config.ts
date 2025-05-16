@@ -1,3 +1,5 @@
+/// <reference types="node" />
+
 import { defineConfig, devices } from '@playwright/test';
 
 /**
@@ -16,7 +18,7 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
   reporter: 'html',
   use: {
-    baseURL: 'http://localhost:8080',
+    baseURL: 'http://localhost:8000',
     actionTimeout: 0,
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
@@ -33,7 +35,7 @@ export default defineConfig({
   ],
   webServer: {
     command: 'npm run dev',
-    port: 8080,
+    port: 8000, 
     reuseExistingServer: !process.env.CI,
   },
 });
