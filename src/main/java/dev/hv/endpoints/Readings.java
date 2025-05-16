@@ -17,52 +17,122 @@ import java.util.UUID;
 @Path("readings")
 public class Readings {
 
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response getReadings(
-            @QueryParam("customer") UUID customerId,
-            @QueryParam("start") String startDate,
-            @QueryParam("end") String endDate,
-            @QueryParam("kindOfMeter") KindOfMeter kindOfMeter){
+  private static final Logger logger = LogManager.getLogger(Readings.class);
 
-        ReadingDao rd = new ReadingDao();
+  @GET
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response getReadings(
+      @QueryParam("customer") UUID customerId,
+      @QueryParam("start") String startDate,
+      @QueryParam("end") String endDate,
+      @QueryParam("kindOfMeter") KindOfMeter kindOfMeter) {
 
-        List<Reading> readings = rd.find(customerId,
-                startDate != null ? LocalDate.parse(startDate, DateTimeFormatter.ofPattern("dd.MM.yyyy")) : null,
-                endDate != null ? LocalDate.parse(endDate, DateTimeFormatter.ofPattern("dd.MM.yyyy")) : null,
-                //kindOfMeter != null ? KindOfMeter.valueOf(kindOfMeter) : null);
-                kindOfMeter);
-
-        return Response.status(Response.Status.OK).entity(readings).build();
+    LocalDate start = null;
+    LocalDate end = null;
+    try {
+      if (startDate != null) {
+        start = LocalDate.parse(startDate, DateTimeFormatter.ISO_DATE);
+      }
+      if (endDate != null) {
+        end = LocalDate.parse(endDate, DateTimeFormatter.ISO_DATE);
+      }
+    } catch (Exception e) {
+      return Response.status(Response.Status.BAD_REQUEST)
+          .entity("Invalid date format. Use yyyy-MM-dd.").build();
     }
 
-    @POST
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response postReadings(){
-        return Response.status(Response.Status.OK).build();
-    }
-    @PUT
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response putReadings(){
-        return Response.status(Response.Status.OK).build();
-    }
+    ReadingDao rd = new ReadingDao();
+    List<Reading> readings = rd.find(customerId, start, end, kindOfMeter);
 
-    @GET
-    @Path("{id}")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response getReading(@PathParam("id")UUID id){
-        ReadingDao readingDao = new ReadingDao();
-        Reading reading = readingDao.read(id);
-        //logger.debug("Found Reading: {} {} {}", reading.getId(), reading.getDateOfReading().toString(), reading.getKindOfMeter().name());
-        return reading != null ?
-                Response.status(Response.Status.OK).entity(reading).build() :
-                Response.status(Response.Status.NOT_FOUND).build();
-    }
+    // Wrap in object to match OpenAPI schema
+    return Response.status(Response.Status.OK)
+        .entity(java.util.Collections.singletonMap("readings", readings))
+        .build();
+  }
 
-    @DELETE
-    @Path("{id}")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response deleteReading(@PathParam("id") UUID id){
-        return Response.status(Response.Status.OK).build();
+  @POST
+  @Consumes(MediaType.APPLICATION_JSON)
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response postReading(String body) {
+    try {
+      // Parse JSON and extract "reading" object
+      var mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+      var node = mapper.readTree(body).get("reading");
+      if (node == null) {
+        return Response.status(Response.Status.BAD_REQUEST).entity("Missing 'reading' property").build();
+      }
+      Reading reading = mapper.treeToValue(node, Reading.class);
+
+      // Assign UUID if missing
+      if (reading.getId() == null) {
+        reading.setId(java.util.UUID.randomUUID());
+      }
+
+      ReadingDao dao = new ReadingDao();
+      dao.create(reading);
+
+      return Response.status(Response.Status.CREATED)
+          .entity(java.util.Collections.singletonMap("reading", reading))
+          .build();
+    } catch (Exception e) {
+      return Response.status(Response.Status.BAD_REQUEST).entity("Invalid request body: " + e.getMessage()).build();
     }
+  }
+
+  @PUT
+  @Consumes(MediaType.APPLICATION_JSON)
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response putReading(String body) {
+    try {
+      var mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+      var node = mapper.readTree(body).get("reading");
+      if (node == null) {
+        return Response.status(Response.Status.BAD_REQUEST).entity("Missing 'reading' property").build();
+      }
+      Reading reading = mapper.treeToValue(node, Reading.class);
+
+      if (reading.getId() == null) {
+        return Response.status(Response.Status.BAD_REQUEST).entity("Missing reading id").build();
+      }
+
+      ReadingDao dao = new ReadingDao();
+      Reading existing = dao.read(reading.getId());
+      if (existing == null) {
+        return Response.status(Response.Status.NOT_FOUND).entity("Reading not found").build();
+      }
+
+      dao.update(reading);
+
+      return Response.status(Response.Status.OK)
+          .entity(java.util.Collections.singletonMap("reading", reading))
+          .build();
+    } catch (Exception e) {
+      return Response.status(Response.Status.BAD_REQUEST).entity("Invalid request body: " + e.getMessage()).build();
+    }
+  }
+
+  @GET
+  @Path("{id}")
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response getReading(@PathParam("id") UUID id) {
+    ReadingDao readingDao = new ReadingDao();
+    Reading reading = readingDao.read(id);
+    logger.debug("Found Reading: {} {} {}", reading.getId(), reading.getDateOfReading().toString(),
+        reading.getKindOfMeter().name());
+    return reading != null ? Response.status(Response.Status.OK).entity(reading).build()
+        : Response.status(Response.Status.NOT_FOUND).build();
+  }
+
+  @DELETE
+  @Path("{id}")
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response deleteReading(@PathParam("id") UUID id) {
+    ReadingDao readingDao = new ReadingDao();
+    try {
+      readingDao.delete(id);
+    } catch (Exception e) {
+      return Response.status(Response.Status.NOT_FOUND).entity("Error deleting reading: " + e.getMessage()).build();
+    }
+    return Response.status(Response.Status.OK).build();
+  }
 }

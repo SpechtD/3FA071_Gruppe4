@@ -1,0 +1,816 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Hausverwaltung",
+    "version": "1.0",
+    "x-logo": {
+      "url": ""
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080",
+      "description": "",
+      "x-last-modified": 1747224186816
+    }
+  ],
+  "paths": {
+    "/customers": {
+      "description": "Für das gesendete Kunden-Objekt soll der Server eine\neindeutige UUID vergeben (falls der Client noch keine\neindeutige UUID vergeben hat), das Objekt anschließend in\nder Datenbank speichern und dieses (incl. gespeicherter\nUUID) mit dem Code 201 zurückschicken.",
+      "get": {
+        "tags": [
+          "Customer"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Customers"
+                }
+              }
+            },
+            "description": "Ok",
+            "x-last-modified": 1747204458063
+          }
+        }
+      },
+      "put": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Customer"
+              }
+            }
+          },
+          "required": false
+        },
+        "tags": [
+          "Customer"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Customer"
+                }
+              }
+            },
+            "description": "Ok",
+            "x-last-modified": 1747204864749
+          },
+          "400": {
+            "description": "Bad Request",
+            "x-last-modified": 1747204889977
+          },
+          "404": {
+            "description": "Not Found",
+            "x-last-modified": 1747204909956
+          }
+        }
+      },
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Customer"
+              }
+            }
+          },
+          "required": true
+        },
+        "tags": [
+          "Customer"
+        ],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Customer"
+                }
+              }
+            },
+            "description": "Ok",
+            "x-last-modified": 1747204590447
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Bad Request",
+            "x-last-modified": 1747204688378
+          }
+        }
+      },
+      "x-last-modified": 1747202129223
+    },
+    "/readings": {
+      "description": "Der Server soll für das gesendete Objekt eine eindeutige\nUUID vergeben (falls der Client noch keine eindeutige UUID\nvergeben hat), dieses abspeichern und dieses (incl. UUID)\nmit dem Code 201 zurückschicken. Falls das Kunden-Objekt\nim gesendeten Ablesungsobjekt noch nicht existiert, soll\ndieser Kunde zusätzlich angelegt werden.",
+      "get": {
+        "tags": [
+          "Reading"
+        ],
+        "parameters": [
+          {
+            "deprecated": false,
+            "name": "customer",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "in": "query",
+            "required": false,
+            "allowEmptyValue": false,
+            "x-last-modified": 1747206513665
+          },
+          {
+            "deprecated": false,
+            "name": "start",
+            "schema": {
+              "format": "date",
+              "type": "string"
+            },
+            "in": "query",
+            "required": false,
+            "allowEmptyValue": false,
+            "x-last-modified": 1747206575039
+          },
+          {
+            "deprecated": false,
+            "name": "end",
+            "schema": {
+              "format": "date",
+              "type": "string"
+            },
+            "in": "query",
+            "required": false,
+            "allowEmptyValue": false,
+            "x-last-modified": 1747206605617
+          },
+          {
+            "deprecated": false,
+            "name": "kindOfMeter",
+            "schema": {
+              "enum": [
+                "HEIZUNG",
+                "STROM",
+                "WASSER",
+                "UNBEKANNT"
+              ],
+              "type": "string"
+            },
+            "in": "query",
+            "required": false,
+            "allowEmptyValue": false,
+            "x-last-modified": 1747206688300
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Customers"
+                }
+              }
+            },
+            "description": "Ok",
+            "x-last-modified": 1747206723842
+          },
+          "404": {
+            "description": "Not Found",
+            "x-last-modified": 1747206735502
+          }
+        },
+        "description": "Der Server antwortet mit einer Liste aller Ablesungen, die zu\nden übergebenen Parametern passen. Mit start und end\nkann der Zeitraum der angeforderten Ablesungen\neingegrenzt werden. Wird kein Anfangsdatum übergeben,\nsollen alle Ablesungen bis zum Enddatum gesendet werden.\nWird kein Enddatum übergeben, so sollen alle Ablesungen\nbis zum heutigen Datum gesendet werden.\nWird ein Datum nicht im Format yyyy-MM-dd übermittelt,\nso soll mit dem Code 400 eine entsprechende Fehlermeldung\ngesendet werden. Mit kindOfMeter kann bei Bedarf\nzusätzlich nach einer bestimmten Zählerart gefiltert werden.\nWird für die übergebenen Parameter keine passende\nAblesung gefunden, so soll das JSON-Array in der Antwort\nleer sein. Beachten Sie das JSON-Schema Nr. 4"
+      },
+      "put": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Reading"
+              }
+            }
+          },
+          "required": false
+        },
+        "tags": [
+          "Reading"
+        ],
+        "responses": {
+          "200": {
+            "description": "Ok",
+            "x-last-modified": 1747208101099
+          },
+          "400": {
+            "description": "Bad Request",
+            "x-last-modified": 1747208121203
+          },
+          "404": {
+            "description": "Not Found",
+            "x-last-modified": 1747208137721
+          }
+        },
+        "description": "Der Server soll die Werte des gespeicherten Ablesungsobjekt\nmit den Werten des gesendeten Objekts überschreiben.\nBeachten Sie Hinweis Nr. 1, 2 und das JSON-Schema Nr. 2"
+      },
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Reading"
+              }
+            }
+          },
+          "required": false
+        },
+        "tags": [
+          "Reading"
+        ],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Reading"
+                }
+              }
+            },
+            "description": "Created",
+            "x-last-modified": 1747206949348
+          },
+          "400": {
+            "description": "Bad Request",
+            "x-last-modified": 1747206963928
+          }
+        },
+        "description": "Der Server soll für das gesendete Objekt eine eindeutige\nUUID vergeben (falls der Client noch keine eindeutige UUID\nvergeben hat), dieses abspeichern und dieses (incl. UUID)\nmit dem Code 201 zurückschicken. Falls das Kunden-Objekt\nim gesendeten Ablesungsobjekt noch nicht existiert, soll\ndieser Kunde zusätzlich angelegt werden.\nBeachten Sie Hinweis Nr. 1 und das JSON-Schema Nr . 2"
+      },
+      "x-last-modified": 1747202301248
+    },
+    "/customers/{uuid}": {
+      "get": {
+        "tags": [
+          "Customer"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Customer"
+                }
+              }
+            },
+            "description": "Ok",
+            "x-last-modified": 1747205951519
+          },
+          "404": {
+            "description": "Not Found",
+            "x-last-modified": 1747205964690
+          }
+        },
+        "summary": "",
+        "description": "Der Server sendet mit Code 200 das entsprechende\nKunden-Objekt zurück. Beachten Sie Hinweis Nr. 2 und das\nJSON-Schema Nr. 1."
+      },
+      "delete": {
+        "tags": [
+          "Customer"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerReading"
+                }
+              }
+            },
+            "description": "Ok",
+            "x-last-modified": 1747206333542
+          },
+          "404": {
+            "description": "Not Found",
+            "x-last-modified": 1747206349145
+          }
+        },
+        "description": "Der Kunde mit der übergebenen {uuid} im Pfad soll\ngelöscht werden. Die Ablesungen dieses Kunden sollen aber\nnoch in der Datenbank gespeichert bleiben, der Attributwert\nvon customer soll dabei auf null gesetzt werden. Das\ngel¨oschte Kunden-Objekt soll zusammen mit der Liste der\nAblesungen dieses Kunden (Wert für customer: null) mit\ndem Code 200 zurückgeschickt werden.\nBeachten Sie Hinweis Nr. 2 und das JSON-Schema Nr. 5"
+      },
+      "parameters": [
+        {
+          "deprecated": false,
+          "name": "uuid",
+          "schema": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "in": "path",
+          "required": true,
+          "x-last-modified": 1747205901114
+        }
+      ],
+      "x-last-modified": 1747205860014
+    },
+    "/readings/{uuid}": {
+      "get": {
+        "tags": [
+          "Reading"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Reading"
+                }
+              }
+            },
+            "description": "Ok",
+            "x-last-modified": 1747208291427
+          },
+          "404": {
+            "description": "Not Found",
+            "x-last-modified": 1747208302918
+          }
+        },
+        "description": "Der Server sendet mit Code 200 das Ablesungs-Objekt mit\nder übergebenen {uuid}. Beachten Sie Hinweis Nr. 2 und\ndas JSON-Schema Nr. 2."
+      },
+      "delete": {
+        "tags": [
+          "Reading"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Reading"
+                }
+              }
+            },
+            "description": "Ok",
+            "x-last-modified": 1747208465015
+          },
+          "404": {
+            "description": "Not Found",
+            "x-last-modified": 1747208485515
+          }
+        },
+        "description": "Die Ablesung mit der übergebenen {uuid} im Pfad soll\ngelöscht werden. Dabei soll das gel¨oschte Ablesungsobjekt\nmit dem Code 200 zurückgeschickt werden.\nBeachten Sie Hinweis Nr. 2 und das JSON-Schema Nr. 2."
+      },
+      "parameters": [
+        {
+          "deprecated": false,
+          "name": "uuid",
+          "schema": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "in": "path",
+          "required": true,
+          "x-last-modified": 1747205901114
+        }
+      ],
+      "x-last-modified": 1747208232294
+    },
+    "/setupDB": {
+      "summary": "Sets up database schema",
+      "delete": {
+        "tags": [
+          "Control"
+        ],
+        "responses": {
+          "200": {
+            "description": "Ok",
+            "x-last-modified": 1747293159205
+          }
+        },
+        "summary": "Setup Database",
+        "description": "Für Testzwecke: Die Tabellen Kunde und Ablesung werden\nin der Datenbank gelöscht (incl. Inhalt) und werden\nanschließend neu angelegt."
+      },
+      "x-last-modified": 1747293013865
+    }
+  },
+  "components": {
+    "schemas": {
+      "Customer": {
+        "x-title": "Customer - JSON - Schema",
+        "x-type": "object",
+        "x-required": [
+          "customer"
+        ],
+        "x-properties": {
+          "customer": {
+            "type": "object",
+            "required": [
+              "firstName",
+              "lastName",
+              "gender"
+            ],
+            "properties": {
+              "id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "firstName": {
+                "type": "string"
+              },
+              "lastName": {
+                "type": "string"
+              },
+              "birthDate": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "date"
+              },
+              "gender": {
+                "type": "string",
+                "enum": [
+                  "D",
+                  "M",
+                  "U",
+                  "W"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "Reading": {
+        "x-title": "JSON - Schema Reading",
+        "x-type": "object",
+        "x-required ": [
+          "reading"
+        ],
+        "x-properties": {
+          "reading": {
+            "type": "object",
+            "required": [
+              "customer",
+              "dateOfReading",
+              "meterId",
+              "substitute",
+              "meterCount",
+              "kindOfMeter"
+            ],
+            "properties": {
+              "id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "customer": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "required": [
+                      "firstName",
+                      "lastName",
+                      "gender"
+                    ],
+                    "properties": {
+                      "uuid": {
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      },
+                      "firstName": {
+                        "type": "string"
+                      },
+                      "lastName": {
+                        "type": "string"
+                      },
+                      "birthDate": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "format": "date"
+                      },
+                      "gender": {
+                        "type": "string",
+                        "enum": [
+                          "D",
+                          "M",
+                          "U",
+                          "W"
+                        ]
+                      }
+                    }
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "dateOfReading": {
+                "type": "string",
+                "format": "date"
+              },
+              "comment": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "meterId": {
+                "type": "string"
+              },
+              "substitute": {
+                "type": "boolean"
+              },
+              "meterCount": {
+                "type": "number"
+              },
+              "kindOfMeter": {
+                "type": "string",
+                "enum": [
+                  "HEIZUNG",
+                  "STROM",
+                  "WASSER",
+                  "UNBEKANNT"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "Customers": {
+        "x-title": "Customers - JSON - Schema",
+        "x-type": "object",
+        "x-required": [
+          "customers"
+        ],
+        "x-properties": {
+          "customers": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "firstName",
+                "lastName",
+                "gender"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "firstName": {
+                  "type": "string"
+                },
+                "lastName": {
+                  "type": "string"
+                },
+                "birthDate": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "format": "date"
+                },
+                "gender": {
+                  "type": "string",
+                  "enum": [
+                    "D",
+                    "M",
+                    "U",
+                    "W"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "Readings": {
+        "x-title": "JSON - Schema Readings",
+        "x-type": "object",
+        "x-required": [
+          "readings"
+        ],
+        "x-properties": {
+          "readings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "customer",
+                "dateOfReading",
+                "meterId",
+                "substitute",
+                "meterCount",
+                "kindOfMeter"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "customer": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "required": [
+                        "id",
+                        "firstName",
+                        "lastName",
+                        "gender"
+                      ],
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "firstName": {
+                          "type": "string"
+                        },
+                        "lastName": {
+                          "type": "string"
+                        },
+                        "birthDate": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "format": "date"
+                        },
+                        "gender": {
+                          "type": "string",
+                          "enum": [
+                            "D",
+                            "M",
+                            "U",
+                            "W"
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "dateOfReading": {
+                  "type": "string",
+                  "format": "date"
+                },
+                "comment": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "meterId": {
+                  "type": "string"
+                },
+                "substitute": {
+                  "type": "boolean"
+                },
+                "meterCount": {
+                  "type": "number"
+                },
+                "kindOfMeter": {
+                  "type": "string",
+                  "enum": [
+                    "HEIZUNG",
+                    "STROM",
+                    "WASSER",
+                    "UNBEKANNT"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "CustomerReading": {
+        "x-title": "JSON - Schema Customer with readings",
+        "x-type": "object",
+        "x-required": [
+          "customer",
+          "readings"
+        ],
+        "x-properties": {
+          "customer": {
+            "type": "object",
+            "required": [
+              "uuid",
+              "firstName",
+              "lastName",
+              "gender"
+            ],
+            "properties": {
+              "uuid": {
+                "type": "string"
+              },
+              "firstName": {
+                "type": "string"
+              },
+              "lastName": {
+                "type": "string"
+              },
+              "birthDate": {
+                "type": "string",
+                "format": "date"
+              },
+              "gender": {
+                "type": "string",
+                "enum": [
+                  "D",
+                  "M",
+                  "U",
+                  "W"
+                ]
+              }
+            }
+          }
+        },
+        "x-readings": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "uuid",
+              "customer",
+              "dateOfReading",
+              "meterId",
+              "substitute",
+              "metercount",
+              "kindOfMeter"
+            ],
+            "properties": {
+              "uuid": {
+                "type": "string"
+              },
+              "customer": {
+                "type": "null"
+              },
+              "dateOfReading": {
+                "type": "string",
+                "format": "date"
+              },
+              "comment": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "meterId": {
+                "type": "string"
+              },
+              "substitute": {
+                "type": "boolean"
+              },
+              "metercount": {
+                "type": "number"
+              },
+              "kindOfMeter": {
+                "type": "string",
+                "enum": [
+                  "HEIZUNG",
+                  "STROM",
+                  "WASSER",
+                  "UNBEKANNT"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "securitySchemes": {},
+    "headers": {},
+    "responses": {},
+    "parameters": {}
+  },
+  "tags": [
+    {
+      "name": "Customer",
+      "description": "Customer operations"
+    },
+    {
+      "name": "Reading",
+      "description": "Reading operations"
+    },
+    {
+      "name": "Control",
+      "description": "Server controls"
+    }
+  ],
+  "security": []
+}
