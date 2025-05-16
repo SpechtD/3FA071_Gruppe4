@@ -83,6 +83,7 @@ public class DbConnection implements IDatabaseConnection {
 
     @Override
     public void createAllTables() {
+      
         if (connection == null) {
             logger.error("Database connection is null");
             throw new RuntimeException("Database connection is not established");
@@ -114,6 +115,7 @@ public class DbConnection implements IDatabaseConnection {
             logger.info("Creating Reading table...");
             stmt.executeUpdate(createReading);
             logger.info("Reading table created successfully");
+
         } catch (SQLException e) {
             logger.error("Failed to create tables: {}", e.getMessage());
             throw new RuntimeException("createAllTables wasn't successful: " + e);
@@ -127,6 +129,7 @@ public class DbConnection implements IDatabaseConnection {
         stmt.executeUpdate("TRUNCATE TABLE Reading;");
         stmt.executeUpdate("TRUNCATE TABLE Customer;");
         stmt.executeUpdate("SET FOREIGN_KEY_CHECKS=1;");
+
         } catch (SQLException e) {
             throw new RuntimeException("truncateAllTables wasn't successful: " + e);
         }
@@ -135,12 +138,13 @@ public class DbConnection implements IDatabaseConnection {
     @Override
     public void removeAllTables() {
         String removealltables = 
+
                 "DROP TABLE IF EXISTS Reading, Customer";
 
         try (Statement stmt = connection.createStatement()) {
-            stmt.executeUpdate(removealltables);
+            stmt.executeUpdate(removeAllTables);
         } catch (SQLException e) {
-            throw new RuntimeException("removealltables wasn't successful: " + e);
+            throw new RuntimeException("removeAllTables wasn't successful: " + e);
         }
     }
 
