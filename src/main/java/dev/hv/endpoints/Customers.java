@@ -2,12 +2,18 @@ package dev.hv.endpoints;
 
 import dev.hv.Customer;
 import dev.hv.dao.CustomerDao;
+import dev.hv.services.CSVReader;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
+import org.glassfish.jersey.media.multipart.FormDataParam;
 
+import java.io.File;
+import java.io.InputStream;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.UUID;
 
@@ -108,5 +114,31 @@ public class Customers {
       return Response.status(Response.Status.NOT_FOUND).entity("Customer not found").build();
     }
     return Response.status(Response.Status.OK).build();
+  }
+
+  @POST
+  @Path("import")
+  @Consumes(MediaType.MULTIPART_FORM_DATA)
+  public Response importData(@FormDataParam("file") InputStream fileInputStream,
+      @FormDataParam("file") FormDataContentDisposition fileMetaData) {
+
+    if (!fileMetaData.getType().equals("text/csv")) {
+    }
+
+    File csv = new File(System.getProperty("java.io.tmpdir") + UUID.randomUUID().toString() + ".csv");
+
+    try {
+      java.nio.file.Files.copy(
+          fileInputStream,
+          csv.toPath(),
+          StandardCopyOption.REPLACE_EXISTING);
+    } catch (Exception e) {
+      return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+          .entity("Error while saving the file: " + e.getMessage()).build();
+    }
+
+    CSVReader.parseCustomer(csv.toPath());
+
+    return Response.ok("Data imported successfully").build();
   }
 }

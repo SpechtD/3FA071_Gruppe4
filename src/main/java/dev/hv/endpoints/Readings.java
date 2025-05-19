@@ -3,12 +3,18 @@ package dev.hv.endpoints;
 import dev.hv.Reading;
 import dev.hv.dao.ReadingDao;
 import dev.hv.model.KindOfMeter;
+import dev.hv.services.CSVReader;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
+import org.glassfish.jersey.media.multipart.FormDataParam;
 
+import java.io.File;
+import java.io.InputStream;
+import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -134,5 +140,31 @@ public class Readings {
       return Response.status(Response.Status.NOT_FOUND).entity("Error deleting reading: " + e.getMessage()).build();
     }
     return Response.status(Response.Status.OK).build();
+  }
+
+  @POST
+  @Path("import")
+  @Consumes(MediaType.MULTIPART_FORM_DATA)
+  public Response importData(@FormDataParam("file") InputStream fileInputStream,
+      @FormDataParam("file") FormDataContentDisposition fileMetaData) {
+
+    if (!fileMetaData.getType().equals("text/csv")) {
+    }
+
+    File csv = new File(System.getProperty("java.io.tmpdir") + UUID.randomUUID().toString() + ".csv");
+
+    try {
+      java.nio.file.Files.copy(
+          fileInputStream,
+          csv.toPath(),
+          StandardCopyOption.REPLACE_EXISTING);
+    } catch (Exception e) {
+      return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+          .entity("Error while saving the file: " + e.getMessage()).build();
+    }
+
+    CSVReader.parseReading(csv.toPath());
+
+    return Response.ok("Data imported successfully").build();
   }
 }
