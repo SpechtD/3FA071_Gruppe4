@@ -1,6 +1,8 @@
 package dev.hv;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
 import dev.hv.model.ICustomer;
 import dev.hv.model.IId;
 import dev.hv.model.IReading;
@@ -13,6 +15,7 @@ import java.util.UUID;
 public class Reading implements IReading, IId {
   private UUID id;
   private String comment;
+  @JsonDeserialize(as = Customer.class)
   private ICustomer customer;
   @JsonFormat(pattern = "yyyy-MM-dd")
   private LocalDate dateOfReading;
@@ -20,6 +23,10 @@ public class Reading implements IReading, IId {
   private double meterCount;
   private String meterId;
   private boolean substitute;
+
+  public Reading() {
+    this.id = UUID.randomUUID(); // Generate a new UUID for the reading
+  }
 
   public Reading(UUID id, String comment, ICustomer customer, LocalDate dateOfReading, KindOfMeter kindOfMeter,
       double meterCount, String meterId, boolean substitute) {
